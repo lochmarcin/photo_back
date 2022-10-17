@@ -2,12 +2,20 @@ const express = require('express')
 const routes = require('./index')
 const cors = require('cors')
 const path = require('path');
+const bodyParser = require('body-parser')
 
 
 
 const port = 5000
 
 const app = express()
+
+app.use(bodyParser.json({ limit: '100mb' }))
+app.use(bodyParser.urlencoded({ extended: true, limit: '100mb' }))
+
+app.listen(port, () => {
+    console.log("serwer PHOTO działa na porcie " + port)
+})
 
 app.use(
     cors({
@@ -33,11 +41,8 @@ app.use(
 express.static(path.join(__dirname, '/uploads'));
 
 
+
+
 app.use('/', routes)
 
-app.listen(port, () => {
-    console.log("serwer PHOTO działa na porcie " + port)
-    // const log = new Log
-    // log.login(true,"marcin")
-})
 
