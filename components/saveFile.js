@@ -103,7 +103,7 @@ const multer = require("multer")
 
 
 let fileName
-
+let dirTerget
 
 
 const maxSize = 1 * 1000 * 1000 * 100 * 10;
@@ -111,7 +111,7 @@ const maxSize = 1 * 1000 * 1000 * 100 * 10;
 const storage = multer.diskStorage({
 
     destination: function (req, file, cb) {
-        cb(null, './uploads')
+        cb(null, `./uploads${dirTerget}`)
     },
     filename: function (req, file, cb) {
         console.log("FILE ORGINAL NAME: " + file.originalname)
@@ -155,9 +155,14 @@ const upload = multer({
 
 
 
-router.post("/sendFile", upload.single('apk'), async (req, res) => {
+// router.post("/sendFile",upload.single('apk'), async (req, res) => {
+// router.post("/sendFile", ()=>{dirTerget=`/${req.body.folderName}`} ,upload.single('apk'), async (req, res) => {
+router.post("/sendFile", async (req, res) => {
     console.log("Send File")
+    dirTerget=`/${req.body.folderName}`
+    upload.single('apk')
     // https://stackoverflow.com/questions/56464707/how-to-redirect-back-to-a-page-when-wrong-file-type-has-been-uploaded-via-multer
+
 
     try {
         fs.access('./../uploads', (err) => {
@@ -181,13 +186,41 @@ router.post("/sendFile", upload.single('apk'), async (req, res) => {
         // const formatedName = req.file.originalname.split(' ').join('_')
         // const fileName = new Date().toISOString().replace(/:/gi, '-') + '_' + formatedName
         // console.log("Nazwa Pliku: " + fileName)
-        
+
+
 
         res.status(200).send("może poszło")
     } catch (err) {
         console.log("Error - AddAPK: " + err)
     }
 
+})
+
+router.post("/newFolder", (req, res) => {
+    console.log("/newFolder: ")
+    const folderName = req.body.folderName
+    console.log(folderName)
+    const dir = `./uploads/${folderName}`
+
+    try {
+        fs.access('./../uploads', (err) => {
+            if (err) {
+                fs.mkdirSync('./../uploads')
+            }
+            else {
+                if (fs.existsSync(dir)) {
+                    res.status(200).send({ folder: "exist" })
+                }
+                else {
+                    fs.mkdirSync(dir);
+                    res.status(200).send({ folder: "created" })
+                }
+            }
+        })
+    } catch (err) {
+        console.log("Error - AddAPK: " + err)
+        res.sendStatus(500)
+    }
 })
 
 
